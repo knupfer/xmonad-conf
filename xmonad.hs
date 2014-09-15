@@ -39,8 +39,10 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
  , ((modm .|. shiftMask, xK_space) , setLayout $ XMonad.layoutHook conf)
  , ((modm .|. shiftMask, xK_c)      , kill)             -- kill foc win
  , ((modm .|. shiftMask, xK_j)    , windows W.swapDown) -- swap foc next
- , ((modm .|. shiftMask, xK_k) , windows W.swapUp)      -- swap foc prev
+ , ((modm .|. shiftMask, xK_k)    , windows W.swapUp)   -- swap foc prev
  , ((modm .|. shiftMask, xK_q)      , io exitSuccess)   -- quit
+ , ((modm .|. shiftMask, xK_a)    , sendMessage Shrink) -- shrink master
+ , ((modm .|. shiftMask, xK_l)    , sendMessage Expand) -- expand master
  , ((modm, xK_q)      , spawn "xmonad --recompile; xmonad --restart")
  , ((modm, xK_g)      , refresh)                -- refresh windows
  , ((modm, xK_p)      , spawn "dmenu_run")      -- dmenu
@@ -49,8 +51,6 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
  , ((modm, xK_a)      , windows W.focusDown)    -- focus next
  , ((modm, xK_m)      , windows W.focusMaster)  -- focus mastr
  , ((modm, xK_Return) , windows W.swapMaster)   -- swap foc mast
- , ((modm, xK_h)      , sendMessage Shrink)     -- shrink master
- , ((modm, xK_l)      , sendMessage Expand)     -- expand master
  , ((modm, xK_j)      , withFocused $ windows . W.sink) -- tiling
  , ((modm, xK_comma)  , sendMessage (IncMasterN 1))     -- more wins
  , ((modm, xK_period) , sendMessage (IncMasterN (-1)))  -- less wins
