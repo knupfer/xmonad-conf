@@ -41,8 +41,8 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
  , ((modm .|. shiftMask, xK_j)    , windows W.swapDown) -- swap foc next
  , ((modm .|. shiftMask, xK_k)    , windows W.swapUp)   -- swap foc prev
  , ((modm .|. shiftMask, xK_q)      , io exitSuccess)   -- quit
- , ((modm .|. shiftMask, xK_a)    , sendMessage Shrink) -- shrink master
- , ((modm .|. shiftMask, xK_l)    , sendMessage Expand) -- expand master
+ , ((modm .|. shiftMask, xK_i)    , sendMessage Shrink) -- shrink master
+ , ((modm .|. shiftMask, xK_a)    , sendMessage Expand) -- expand master
  , ((modm, xK_q)      , spawn "xmonad --recompile; xmonad --restart")
  , ((modm, xK_g)      , refresh)                -- refresh windows
  , ((modm, xK_p)      , spawn "dmenu_run")      -- dmenu
