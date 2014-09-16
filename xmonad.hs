@@ -9,7 +9,7 @@ main :: IO ()
 main = xmonad defaults
 
 myTerminal :: String
-myTerminal = "xterm"
+myTerminal = "xterm -rv -b 0 -w 0 -fa 8"
 
 myClickJustFocuses :: Bool -- click on window also passes the click
 myClickJustFocuses = False
@@ -35,17 +35,16 @@ myWorkspaces = fmap show ([1..4] :: [Int])
 myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ()) -- key bindings
 myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
  [ ((modm .|. shiftMask, xK_Return) , spawn $ XMonad.terminal conf) -- term
- , ((modm .|. shiftMask, xK_p)      , spawn "gmrun")            -- gmrun
  , ((modm .|. shiftMask, xK_space) , setLayout $ XMonad.layoutHook conf)
- , ((modm .|. shiftMask, xK_c)      , kill)             -- kill foc win
+ , ((modm .|. shiftMask, xK_c)     , kill) -- kill foc win
  , ((modm .|. shiftMask, xK_j)    , windows W.swapDown) -- swap foc next
  , ((modm .|. shiftMask, xK_k)    , windows W.swapUp)   -- swap foc prev
- , ((modm .|. shiftMask, xK_q)      , io exitSuccess)   -- quit
+ , ((modm .|. shiftMask, xK_q)     , io exitSuccess)    -- quit
  , ((modm .|. shiftMask, xK_i)    , sendMessage Shrink) -- shrink master
  , ((modm .|. shiftMask, xK_a)    , sendMessage Expand) -- expand master
  , ((modm, xK_q)      , spawn "xmonad --recompile; xmonad --restart")
- , ((modm, xK_g)      , refresh)                -- refresh windows
- , ((modm, xK_p)      , spawn "dmenu_run")      -- dmenu
+ , ((modm, xK_g)      , refresh)           -- refresh windows
+ , ((modm, xK_p)      , spawn "dmenu_run") -- dmenu
  , ((modm, xK_space)  , sendMessage NextLayout) -- rotate algos
  , ((modm, xK_i)      , windows W.focusUp)      -- focus prev
  , ((modm, xK_a)      , windows W.focusDown)    -- focus next
@@ -129,25 +128,25 @@ myLogHook :: X ()
 myLogHook = return ()
 
 myStartupHook :: X () -- Startup hook, by default do nothing
-myStartupHook = return ()
+myStartupHook = spawn "xmobar" >> spawn "emacs"
 
 defaults :: XConfig (Choose Tall (Choose (Mirror Tall) Full))
-defaults               = XConfig
-  { terminal           = myTerminal -- simple stuff
-  , focusFollowsMouse  = myFocusFollowsMouse
-  , clickJustFocuses   = myClickJustFocuses
-  , borderWidth        = myBorderWidth
-  , modMask            = myModMask
-  , workspaces         = myWorkspaces
-  , normalBorderColor  = myNormalBorderColor
+defaults     = XConfig
+  { terminal = myTerminal -- simple stuff
+  , focusFollowsMouse = myFocusFollowsMouse
+  , clickJustFocuses  = myClickJustFocuses
+  , borderWidth       = myBorderWidth
+  , modMask           = myModMask
+  , workspaces        = myWorkspaces
+  , normalBorderColor = myNormalBorderColor
   , focusedBorderColor = myFocusedBorderColor
-  , keys               = myKeys -- key bindings
-  , mouseBindings      = myMouseBindings
-  , layoutHook         = myLayout -- hooks
-  , manageHook         = myManageHook
-  , handleEventHook    = myEventHook
-  , logHook            = myLogHook
-  , startupHook        = myStartupHook }
+  , keys          = myKeys -- key bindings
+  , mouseBindings = myMouseBindings
+  , layoutHook    = myLayout -- hooks
+  , manageHook    = myManageHook
+  , handleEventHook = myEventHook
+  , logHook         = myLogHook
+  , startupHook     = myStartupHook }
 
 help :: String
 help = unlines
@@ -198,4 +197,4 @@ help = unlines
   , "-- Mouse bindings: default actions bound to mouse events"
   , "mod-button1  Set the window to floating mode and move by dragging"
   , "mod-button2  Raise the window to the top of the stack"
-  , "mod-button3  Set the window to floating mode and resize by dragging"]
+  , "mod-button3  Set the window to floating mode and resize by dragging" ]
