@@ -1,16 +1,19 @@
 -- -*- mode: haskell -*-
-Config { font  = "-*-*-*-*-*-*-*-*-*-*-*-*-*-*"
- , borderColor = "black"
- , border      = TopB
- , bgColor     = "black"
- , fgColor     = "grey"
- , position    = Top
- , commands    =
- [ Run Weather "CYVR" ["-t","<tempC>C","-L","18","-H","25","--normal","green","--high","red","--low","lightblue"] 100
- , Run Cpu ["-L","3","-H","50","--normal","green","--high","red"] 30
- , Run Memory ["-t","Mem: <usedratio>%"] 50
- , Run Com "cat" ["/sys/class/power_supply/manta-battery/capacity"] "bat" 100
- , Run Date "%a %_d %b %H:%M" "date" 600 ]
- , sepChar  = "%"
- , alignSep = "}{"
- , template = " %cpu% | %memory% }{ %CYVR% | <fc=#50aaff>%bat%</fc> | <fc=#ee9a00>%date%</fc> " }
+Config
+  { font     = "-*-*-*-*-*-*-*-*-*-*-*-*-*-*"
+  , bgColor  = "black"
+  , fgColor  = "grey"
+  , position = Top
+  , commands =
+    [ Run Cpu
+      [ "-L"           , "3"
+      , "-H"           , "50"
+      , "--normal"     , "green"
+      , "--high"       , "red"] 30
+    , Run Memory ["-t" , "Mem: <usedratio>%"] 50
+    , Run Com "cat"
+      ["/sys/class/power_supply/manta-battery/capacity"] "bat" 100
+    , Run Date "%a %_d %b %H:%M" "date" 600]
+  , sepChar  = "%"
+  , alignSep = "}{"
+  , template = " %cpu% | %memory% }{ <fc=#50aaff>%bat%</fc> | <fc=#ee9a00>%date%</fc> "}
