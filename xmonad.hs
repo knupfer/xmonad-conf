@@ -34,17 +34,18 @@ myWorkspaces = fmap show ([1..4] :: [Int])
 
 myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ()) -- key bindings
 myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
- [ ((modm .|. shiftMask, xK_Return) , spawn $ XMonad.terminal conf) -- term
- , ((modm .|. shiftMask, xK_space) , setLayout $ XMonad.layoutHook conf)
- , ((modm .|. shiftMask, xK_c)     , kill) -- kill foc win
- , ((modm .|. shiftMask, xK_j)    , windows W.swapDown) -- swap foc next
- , ((modm .|. shiftMask, xK_k)    , windows W.swapUp)   -- swap foc prev
- , ((modm .|. shiftMask, xK_q)     , io exitSuccess)    -- quit
- , ((modm .|. shiftMask, xK_i)    , sendMessage Shrink) -- shrink master
- , ((modm .|. shiftMask, xK_a)    , sendMessage Expand) -- expand master
+ [ ((modm .|. shiftMask, xK_space) , setLayout $ XMonad.layoutHook conf)
+ , ((modm .|. shiftMask, xK_c)     , kill)               -- kill win
+ , ((modm .|. shiftMask, xK_j)     , windows W.swapDown) -- swap next
+ , ((modm .|. shiftMask, xK_k)     , windows W.swapUp)   -- swap prev
+ , ((modm .|. shiftMask, xK_q)     , io exitSuccess)     -- quit
+ , ((modm .|. shiftMask, xK_i)     , sendMessage Shrink) -- shrink
+ , ((modm .|. shiftMask, xK_a)     , sendMessage Expand) -- expand
+ ,  ((modm, xK_h)     , spawn $ XMonad.terminal conf)    -- term
  , ((modm, xK_q)      , spawn "xmonad --recompile; xmonad --restart")
- , ((modm, xK_g)      , refresh)           -- refresh windows
- , ((modm, xK_p)      , spawn "dmenu_run") -- dmenu
+ , ((modm, xK_e)      , spawn "emacs")
+ , ((modm, xK_g)      , refresh)                -- refresh windows
+ , ((modm, xK_p)      , spawn "dmenu_run")      -- dmenu
  , ((modm, xK_space)  , sendMessage NextLayout) -- rotate algos
  , ((modm, xK_i)      , windows W.focusUp)      -- focus prev
  , ((modm, xK_a)      , windows W.focusDown)    -- focus next
@@ -66,7 +67,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
  -- Switch to physical/Xinerama screens 1, 2, or 3
  -- shift, Move client to screen 1, 2, or 3
    ((m .|. modm, key), screenWorkspace sc >>= flip whenJust (windows . f))
- | (key, sc) <- zip [xK_w, xK_e, xK_z] [0..]
+ | (key, sc) <- zip [xK_w, xK_b, xK_z] [0..]
  , (f, m)    <- [(W.view, 0), (W.shift, shiftMask)]]
 
 myMouseBindings :: XConfig t -> M.Map (KeyMask, Button) (Window -> X ())
@@ -128,7 +129,7 @@ myLogHook :: X ()
 myLogHook = return ()
 
 myStartupHook :: X () -- Startup hook, by default do nothing
-myStartupHook = spawn "xmobar" >> spawn "emacs"
+myStartupHook = spawn "xmobar"
 
 defaults :: XConfig (Choose Tall (Choose (Mirror Tall) Full))
 defaults     = XConfig
