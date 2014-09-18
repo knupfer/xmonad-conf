@@ -13,7 +13,8 @@ Config
     , Run Memory ["-t" , "Mem: <usedratio>%"] 50
     , Run Com "cat"
       ["/sys/class/power_supply/manta-battery/capacity"] "bat" 100
-    , Run Date "%a %_d %b %H:%M" "date" 600]
+    , Run Date "%a %_d %b %H:%M" "date" 600
+    , Run StdinReader]
   , sepChar  = "%"
   , alignSep = "}{"
-  , template = " %cpu% | %memory% }{ <fc=#50aaff>%bat%</fc> | <fc=#ee9a00>%date%</fc> "}
+  , template = " %cpu% | %memory% | %StdinReader% }{ <fc=#50aaff>%bat%</fc> | <fc=#ee9a00>%date%</fc> "}

@@ -1,17 +1,14 @@
+import System.IO
 import XMonad
-import qualified XMonad.StackSet as W
-import qualified Data.Map as M
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.ManageDocks
 import XMonad.Util.Run(spawnPipe)
-import System.IO
-
--- TODO: remove the red border when doing fullscreen? tried adding 'smartBorders' to the layoutHook but that didn't work
--- TODO: hook in TopicSpaces, start specific apps on specific workspaces
+import qualified XMonad.StackSet as W
+import qualified Data.Map        as M
 
 main :: IO ()
 main = do
-  xmproc <- spawnPipe "/usr/bin/xmobar /home/quxbar/.xmobarrc"
+  xmproc <- spawnPipe "xmobar"
   spawn $ unwords [ "trayer"
                   , "--edge"            , "top"
                   , "--align"           , "center"
@@ -34,7 +31,9 @@ main = do
     , layoutHook         = avoidStruts $ layoutHook defaultConfig
     , logHook            = dynamicLogWithPP $ xmobarPP
                     { ppOutput = hPutStrLn xmproc
-                    , ppTitle  = xmobarColor "green" "" . shorten 50
+                    , ppTitle  = const ""
+                    , ppLayout = \x -> if x == "Full" then " : " ++ x else ""
+                    , ppSep    = ""
                     }
     }
 
@@ -61,14 +60,12 @@ myKeys conf@(XConfig {XMonad.modMask = m}) = M.fromList $
   , ((m, xK_j)      , withFocused $ windows . W.sink) -- tiling
   , ((m, xK_comma)  , sendMessage (IncMasterN 1))     -- more wins
   , ((m, xK_period) , sendMessage (IncMasterN (-1)))  -- less wins
-    --, ((m, xK_b)  , sendMessage ToggleStruts)
-  ] ++
-  [ ((n .|. m, k), windows $ f i) -- switch to workspace N
+  , ((m, xK_f)      , sendMessage ToggleStruts)
+  ] ++ -- switch and move to workspace
+  [ ((n .|. m, k), windows $ f i)
   | (i, k) <- zip (XMonad.workspaces conf) [xK_t, xK_r, xK_n, xK_s]
-  , (f, n) <- [(W.greedyView, 0), (W.shift, shiftMask)] -- move to workspace
-  ] ++
-  [ -- switch to screen 1, 2, or 3
-    -- move to screen 1, 2, or 3
-    ((n .|. m, key), screenWorkspace sc >>= flip whenJust (windows . f))
+  , (f, n) <- [(W.greedyView, 0), (W.shift, shiftMask)]
+  ] ++ -- switch and move to screen
+  [ ((n .|. m, key), screenWorkspace sc >>= flip whenJust (windows . f))
     | (key, sc) <- zip [xK_F1, xK_F2, xK_F3] [0..]
     , (f, n)    <- [(W.view, 0), (W.shift, shiftMask)]]
