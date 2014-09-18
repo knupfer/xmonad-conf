@@ -9,13 +9,14 @@ import qualified Data.Map        as M
 main :: IO ()
 main = do
   xmproc <- spawnPipe "xmobar"
-  spawn $ unwords [ "trayer"
+  spawn $ unwords [ "pkill" , "trayer;"
+                  , "trayer"
                   , "--edge"            , "top"
                   , "--align"           , "center"
                   , "--SetDockType"     , "true"
                   , "--SetPartialStrut" , "true"
                   , "--expand"          , "true"
-                  , "--widthtype"       , "request"
+                  , "--width"           , "10"
                   , "--height"          , "17"
                   , "--transparent"     , "true"
                   , "--tint"            , "0x000000"]
