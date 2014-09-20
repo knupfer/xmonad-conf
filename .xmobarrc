@@ -6,10 +6,16 @@ Config
   , position = Top
   , commands =
     [ Run Cpu
-      [ "-L"           , "3"
-      , "-H"           , "50"
-      , "--normal"     , "green"
-      , "--high"       , "red"] 30
+      [ "-L"       , "33"
+      , "-H"       , "66"
+      , "--low"    , "#009900"
+      , "--normal" , "#bbbb00"
+      , "--high"   , "#ee0000"
+      , "-t"       , "<bar>"
+      , "-b"       , "·"
+      , "-f"       , "|"
+      , "-W"       , "6"
+      ] 5
     , Run Memory ["-t" , "Mem: <usedratio>%"] 50
     , Run Com "cat"
       ["/sys/class/power_supply/manta-battery/capacity"] "bat" 100
@@ -17,4 +23,4 @@ Config
     , Run StdinReader]
   , sepChar  = "%"
   , alignSep = "}{"
-  , template = " %cpu% | %memory% | %StdinReader% }{ <fc=#50aaff>%bat%</fc> | <fc=#ee9a00>%date%</fc> "}
+  , template = " <fc=#777777>[%cpu%]</fc> | %memory% | %StdinReader% }{ <fc=#50aaff>%bat%</fc> | <fc=#ee9a00>%date%</fc> "}
