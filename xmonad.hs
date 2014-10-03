@@ -3,6 +3,7 @@ import XMonad
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.ManageDocks
 import XMonad.Util.Run(spawnPipe)
+import Graphics.X11.ExtraTypes.XF86
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
 
@@ -43,12 +44,17 @@ myWorkspaces = fmap show ([1..4] :: [Int])
 
 myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ()) -- key bindings
 myKeys conf@(XConfig {XMonad.modMask = m}) = M.fromList $
-  [ ((m .|. shiftMask, xK_space) , setLayout $ XMonad.layoutHook conf)
-  , ((m .|. shiftMask, xK_c)     , kill)               -- kill win
-  , ((m .|. shiftMask, xK_j)     , windows W.swapDown) -- swap next
-  , ((m .|. shiftMask, xK_k)     , windows W.swapUp)   -- swap prev
-  , ((m .|. shiftMask, xK_i)     , sendMessage Shrink) -- shrink
-  , ((m .|. shiftMask, xK_a)     , sendMessage Expand) -- expand
+  [ ((m .|. shiftMask, xK_space)   , setLayout $ XMonad.layoutHook conf)
+  , ((m .|. shiftMask, xK_c)           , kill)               -- kill win
+  , ((m .|. shiftMask, xK_j)          , windows W.swapDown) -- swap next
+  , ((m .|. shiftMask, xK_k)          , windows W.swapUp)   -- swap prev
+  , ((m .|. shiftMask, xK_i)             , sendMessage Shrink) -- shrink
+  , ((m .|. shiftMask, xK_a)             , sendMessage Expand) -- expand
+  , ((noModMask, xF86XK_MonBrightnessUp)   , spawn "xbacklight +20")
+  , ((noModMask, xF86XK_MonBrightnessDown) , spawn "xbacklight -10")
+  , ((noModMask, xF86XK_AudioLowerVolume) , spawn "amixer set Master 2-")
+  , ((noModMask, xF86XK_AudioRaiseVolume) , spawn "amixer set Master 2+")
+  , ((noModMask, xF86XK_AudioMute) , spawn "amixer -D pulse set Master toggle")
   , ((m, xK_h)      , spawn $ XMonad.terminal conf)    -- term
   , ((m, xK_q)      , spawn "xmonad --recompile; xmonad --restart")
   , ((m, xK_e)      , spawn "emacs")
