@@ -25,6 +25,7 @@ main = do
     { modMask            = mod4Mask
     , terminal           = "xterm -rv -b 0 -w 0 -fa 8"
     , keys               = myKeys
+    , mouseBindings      = myMouseBindings
     , workspaces         = myWorkspaces
     , normalBorderColor  = "#000000"
     , focusedBorderColor = "#002222"
@@ -76,3 +77,11 @@ myKeys conf@(XConfig {XMonad.modMask = m}) = M.fromList $
   [ ((n .|. m, key), screenWorkspace sc >>= flip whenJust (windows . f))
     | (key, sc) <- zip [xK_F1, xK_F2, xK_F3] [0..]
     , (f, n)    <- [(W.view, 0), (W.shift, shiftMask)]]
+
+myMouseBindings :: XConfig t -> M.Map (KeyMask, Button) (Window -> X ())
+myMouseBindings (XConfig {XMonad.modMask = m}) = M.fromList
+ [((m, button1) , \w -> focus w >> mouseMoveWindow w
+ >> windows W.shiftMaster) -- dragging
+ , ((m, button2) , \w -> focus w >> windows W.shiftMaster) -- raise
+ , ((m, button3) , \w -> focus w >> mouseResizeWindow w    -- resize
+ >> windows W.shiftMaster)]
