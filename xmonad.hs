@@ -52,8 +52,8 @@ myKeys conf@(XConfig {XMonad.modMask = m}) = M.fromList $
   , ((m .|. shiftMask, xK_k)          , windows W.swapUp)   -- swap prev
   , ((m .|. shiftMask, xK_i)             , sendMessage Shrink) -- shrink
   , ((m .|. shiftMask, xK_a)             , sendMessage Expand) -- expand
-  , ((noModMask, xF86XK_MonBrightnessUp)   , spawn "xbacklight +20")
-  , ((noModMask, xF86XK_MonBrightnessDown) , spawn "xbacklight -10")
+  , ((noModMask, xF86XK_MonBrightnessUp)   , spawn "xbacklight +5")
+  , ((noModMask, xF86XK_MonBrightnessDown) , spawn "xbacklight -5")
   , ((noModMask, xF86XK_AudioLowerVolume) , spawn "amixer set Master 2-")
   , ((noModMask, xF86XK_AudioRaiseVolume) , spawn "amixer set Master 2+")
   , ((noModMask, xF86XK_AudioMute) , spawn "amixer -D pulse set Master toggle")
