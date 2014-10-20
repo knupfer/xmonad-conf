@@ -23,8 +23,9 @@ main = do
                   , "--tint"            , "0x000000"]
   xmonad defaultConfig
     { modMask            = mod4Mask
-    , terminal           = "xterm -rv -b 0 -w 0 -fa 8"
+    , terminal           = "xterm -b 0 -w 0 -fa 8"
     , keys               = myKeys
+    , focusFollowsMouse  = False
     , mouseBindings      = myMouseBindings
     , workspaces         = myWorkspaces
     , normalBorderColor  = "#000000"
