@@ -31,8 +31,9 @@ Config
         -- charged status
       , "-i" , "<left>%"
       ] 50
+      , Run Com "/home/quxbar/.xmonad/volume.sh" [] "vol" 5
     , Run StdinReader
     ]
   , sepChar  = "%"
   , alignSep = "}{"
-  , template = " <fc=#777777>[%cpu%]</fc> | %memory% | %StdinReader% }{ %battery% | <fc=#ee9a00>%date%</fc> "}
+  , template = " <fc=#777777>[%cpu%]</fc> | %memory% | %StdinReader% }{%vol% | %battery% | <fc=#ee9a00>%date%</fc> "}
