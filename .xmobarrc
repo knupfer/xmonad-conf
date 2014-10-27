@@ -16,7 +16,7 @@ Config
       , "-f"       , "|"
       , "-W"       , "6"
       ] 5
-    , Run Memory ["-t" , "Mem: <usedratio>%"] 50
+    , Run Memory ["-t" , "Mem: <usedratio>%"] 60
     , Run Date "%a %_d %b %H:%M" "date" 600
     , Run Battery
       [ "--template" , "<acstatus>"
@@ -30,8 +30,8 @@ Config
       , "-o" , "<left>% <fc=#777777>(<timeleft>)</fc>"
         -- charged status
       , "-i" , "<left>%"
-      ] 50
-      , Run Com "/home/quxbar/.xmonad/volume.sh" [] "vol" 5
+      ] 120
+    , Run Com "/home/quxbar/.xmonad/volume.sh" [] "vol" 20
     , Run StdinReader
     ]
   , sepChar  = "%"
