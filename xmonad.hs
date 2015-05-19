@@ -13,7 +13,9 @@ import           XMonad.Util.Run              (spawnPipe)
 main :: IO ()
 main = do
   xmproc <- spawnPipe "xmobar"
-  spawn $ unwords [ "pkill" , "trayer;"
+  spawn "xss-lock slock"
+  spawn "emacs --daemon"
+  spawn $ unwords [ "pkill"             , "trayer;"
                   , "trayer"
                   , "--edge"            , "top"
                   , "--align"           , "center"
@@ -26,7 +28,7 @@ main = do
                   , "--tint"            , "0x000000"]
   xmonad defaultConfig
     { modMask            = mod4Mask
-    , terminal           = "xterm -b 0 -w 0 -fa 8"
+    , terminal           = "xterm -rv -b 0 -w 0 -fa 8"
     , keys               = myKeys
     , focusFollowsMouse  = False
     , mouseBindings      = myMouseBindings
