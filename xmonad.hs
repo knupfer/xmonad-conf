@@ -1,11 +1,14 @@
-import System.IO
-import XMonad
-import XMonad.Hooks.DynamicLog
-import XMonad.Hooks.ManageDocks
-import XMonad.Util.Run(spawnPipe)
-import Graphics.X11.ExtraTypes.XF86
-import qualified XMonad.StackSet as W
-import qualified Data.Map        as M
+module Main where
+
+import qualified Data.Map                     as M
+import           Graphics.X11.ExtraTypes.XF86
+import           System.IO
+import           XMonad
+import           XMonad.Hooks.DynamicLog
+import           XMonad.Hooks.ManageDocks
+import           XMonad.Layout.NoBorders
+import qualified XMonad.StackSet              as W
+import           XMonad.Util.Run              (spawnPipe)
 
 main :: IO ()
 main = do
