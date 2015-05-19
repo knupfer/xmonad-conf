@@ -50,10 +50,9 @@ myWorkspaces :: [String] -- number and name of workspaces
 myWorkspaces = fmap show ([1..4] :: [Int])
 
 myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ()) -- key bindings
-myKeys conf@(XConfig {XMonad.modMask = m}) = M.fromList $
-  [ ((m .|. shiftMask, xK_space)   , setLayout $ XMonad.layoutHook conf)
-  , ((m .|. shiftMask, xK_c)       , kill)               -- kill win
-  , ((m .|. shiftMask, xK_j)       , windows W.swapDown) -- swap next
+myKeys conf@(XConfig {modMask = m}) = M.fromList $
+  [ ((m .|. shiftMask, xK_c)       , kill)               -- kill win
+  , ((m .|. shiftMask, xK_e)       , windows W.swapDown) -- swap next
   , ((m .|. shiftMask, xK_k)       , windows W.swapUp)   -- swap prev
   , ((m .|. shiftMask, xK_i)       , sendMessage Shrink) -- shrink
   , ((m .|. shiftMask, xK_a)       , sendMessage Expand) -- expand
