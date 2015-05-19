@@ -58,9 +58,9 @@ myKeys conf@(XConfig {modMask = m}) = M.fromList $
   , ((m .|. shiftMask, xK_a)       , sendMessage Expand) -- expand
   , ((0, xF86XK_MonBrightnessUp)   , spawn "xbacklight +5")
   , ((0, xF86XK_MonBrightnessDown) , spawn "xbacklight -5")
-  , ((0, xF86XK_AudioLowerVolume   ), spawn "amixer set Master 2%-")
-  , ((0, xF86XK_AudioRaiseVolume   ), spawn "amixer set Master 2%+")
-  , ((0, xF86XK_AudioMute          ), spawn "amixer set Master toggle")
+  , ((0, xF86XK_AudioLowerVolume)  , spawn "amixer set Master 2%-")
+  , ((0, xF86XK_AudioRaiseVolume)  , spawn "amixer set Master 2%+")
+  , ((0, xF86XK_AudioMute)         , spawn "amixer set Master toggle")
   , ((m, xK_h)      , spawn $ XMonad.terminal conf) -- term
   , ((m, xK_q)      , spawn "xmonad --recompile; xmonad --restart")
   , ((m, xK_e)      , spawn "emacs")
@@ -84,9 +84,9 @@ myKeys conf@(XConfig {modMask = m}) = M.fromList $
     , (f, n)    <- [(W.view, 0), (W.shift, shiftMask)]]
 
 myMouseBindings :: XConfig t -> M.Map (KeyMask, Button) (Window -> X ())
-myMouseBindings (XConfig {XMonad.modMask = m}) = M.fromList
- [((m, button1) , \w -> focus w >> mouseMoveWindow w
- >> windows W.shiftMaster) -- dragging
- , ((m, button2) , \w -> focus w >> windows W.shiftMaster) -- raise
- , ((m, button3) , \w -> focus w >> mouseResizeWindow w    -- resize
- >> windows W.shiftMaster)]
+myMouseBindings (XConfig {modMask = m}) = M.fromList
+  [((m, button1) , \w -> focus w >> mouseMoveWindow w
+  >> windows W.shiftMaster) -- dragging
+  , ((m, button2) , \w -> focus w >> windows W.shiftMaster) -- raise
+  , ((m, button3) , \w -> focus w >> mouseResizeWindow w    -- resize
+  >> windows W.shiftMaster)]
