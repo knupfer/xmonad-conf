@@ -63,7 +63,7 @@ myKeys conf@(XConfig {modMask = m}) = M.fromList $
   , ((0, xF86XK_AudioMute)         , spawn "amixer set Master toggle")
   , ((m, xK_h)      , spawn $ XMonad.terminal conf) -- term
   , ((m, xK_q)      , spawn "xmonad --recompile; xmonad --restart")
-  , ((m, xK_e)      , spawn "emacs")
+  , ((m, xK_e)      , spawn "emacsclient -c")
   , ((m, xK_p)      , spawn "dmenu_run")              -- dmenu
   , ((m, xK_space)  , sendMessage NextLayout)         -- rot algo
   , ((m, xK_i)      , windows W.focusUp)              -- focus prev
