@@ -13,22 +13,29 @@ import           XMonad.Util.Run              (spawnPipe)
 main :: IO ()
 main = do
   xmproc <- spawnPipe "xmobar"
-  spawn "xss-lock slock"
-  spawn "emacs --daemon"
-  spawn $ unwords [ "pkill"             , "trayer;"
-                  , "trayer"
-                  , "--edge"            , "top"
-                  , "--align"           , "center"
-                  , "--SetDockType"     , "true"
-                  , "--SetPartialStrut" , "true"
-                  , "--expand"          , "true"
-                  , "--width"           , "10"
-                  , "--height"          , "17"
-                  , "--transparent"     , "true"
-                  , "--tint"            , "0x000000"]
+  mapM_ (spawn . unwords)
+    [
+      [ "sleep"     , "2;"
+      , "setxkbmap" , "de;"
+      , "xmodmap"   , "/home/knupfer/git/dotfiles/keyboard/linux/normalkeyboard/xmodmapneo"
+      ]
+    , [ "emacs" , "--daemon" ]
+    , [ "pkill" , "trayer"   ]
+    , [ "trayer"
+      , "--edge"            , "top"
+      , "--align"           , "center"
+      , "--SetDockType"     , "true"
+      , "--SetPartialStrut" , "true"
+      , "--expand"          , "true"
+      , "--width"           , "10"
+      , "--height"          , "17"
+      , "--transparent"     , "true"
+      , "--tint"            , "0x000000"
+      ]
+    ]
   xmonad defaultConfig
     { modMask            = mod4Mask
-    , terminal           = "xterm -rv -b 0 -w 0 -fa 8"
+    , terminal           = "xterm -rv -b 0 -w 0"
     , keys               = myKeys
     , focusFollowsMouse  = False
     , mouseBindings      = myMouseBindings
@@ -39,11 +46,11 @@ main = do
     , manageHook         = manageDocks <+> manageHook defaultConfig
     , layoutHook         = smartBorders $ avoidStruts $ layoutHook defaultConfig
     , logHook            = dynamicLogWithPP $ xmobarPP
-                    { ppOutput = hPutStrLn xmproc
-                    , ppTitle  = const ""
-                    , ppLayout = \x -> if x == "Full" then " : " ++ x else ""
-                    , ppSep    = ""
-                    }
+      { ppOutput = hPutStrLn xmproc
+      , ppTitle  = const ""
+      , ppLayout = \x -> if x == "Full" then " : " ++ x else ""
+      , ppSep    = ""
+      }
     }
 
 myWorkspaces :: [String] -- number and name of workspaces
@@ -56,8 +63,8 @@ myKeys conf@(XConfig {modMask = m}) = M.fromList $
   , ((m .|. shiftMask, xK_k)       , windows W.swapUp)   -- swap prev
   , ((m .|. shiftMask, xK_i)       , sendMessage Shrink) -- shrink
   , ((m .|. shiftMask, xK_a)       , sendMessage Expand) -- expand
-  , ((0, xF86XK_MonBrightnessUp)   , spawn "xbacklight +5")
-  , ((0, xF86XK_MonBrightnessDown) , spawn "xbacklight -5")
+  , ((0, xF86XK_MonBrightnessUp)   , spawn "light -A 5")
+  , ((0, xF86XK_MonBrightnessDown) , spawn "light -U 5")
   , ((0, xF86XK_AudioLowerVolume)  , spawn "amixer set Master 2%-")
   , ((0, xF86XK_AudioRaiseVolume)  , spawn "amixer set Master 2%+")
   , ((0, xF86XK_AudioMute)         , spawn "amixer set Master toggle")
