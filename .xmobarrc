@@ -1,22 +1,23 @@
 -- -*- mode: haskell -*-
+
 Config
-  { font     = "-*-*-*-*-*-*-*-*-*-*-*-*-*-*"
+  { font     = "-unknown-DejaVu Sans Mono-normal-normal-normal-*-*-*-*-*-m-0-iso10646-1-unknown-DejaVu Sans Mono-normal-normal-normal-*-*-*-*-*-m-0-iso10646-1"
   , bgColor  = "black"
   , fgColor  = "grey"
   , position = Top
   , commands =
     [ Run Cpu
-      [ "-L"       , "33"
-      , "-H"       , "66"
+      [ "-L"       , "25"
+      , "-H"       , "50"
       , "--low"    , "#009900"
-      , "--normal" , "#bbbb00"
-      , "--high"   , "#ee0000"
+      , "--normal" , "#cccc00"
+      , "--high"   , "#ff0000"
       , "-t"       , "<bar>"
       , "-b"       , "·"
-      , "-f"       , "|"
-      , "-W"       , "6"
-      ] 5
-    , Run Memory ["-t" , "Mem: <usedratio>%"] 60
+      , "-f"       , "·"
+      , "-W"       , "25"
+      ] 1
+    , Run Memory ["-t" , "Mem: <usedratio>%"] 30
     , Run Date "%a %_d %b %H:%M" "date" 600
     , Run Battery
       [ "--template" , "<acstatus>"
@@ -25,15 +26,14 @@ Config
       , "--low"      , "#ff5050"
       , "--normal"   , "#ddaa50"
       , "--high"     , "#50aaff"
-      , "--" -- battery specific options
-        -- discharging status
-      , "-o" , "<left>% <fc=#777777>(<timeleft>)</fc>"
-        -- charged status
-      , "-i" , "<left>%"
-      ] 120
-    , Run Com "/home/quxbar/.xmonad/volume.sh" [] "vol" 20
+      , "--"
+      , "-o"         , "<left>% <fc=#777777>(<timeleft>)</fc>" -- discharging
+      , "-i"         , "<left>%" -- charged
+      ] 40
+    , Run Com "/home/knupfer/.xmonad/volume.sh" [] "vol" 20
     , Run StdinReader
     ]
   , sepChar  = "%"
   , alignSep = "}{"
-  , template = " <fc=#777777>[%cpu%]</fc> | %memory% | %StdinReader% }{%vol% | %battery% | <fc=#ee9a00>%date%</fc> "}
+  , template = " <fc=#222222>%cpu%</fc> | %memory% | %StdinReader% }{%vol% | %battery% | <fc=#ee9a00>%date%</fc> "
+  }
