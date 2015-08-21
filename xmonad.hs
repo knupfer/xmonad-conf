@@ -3,7 +3,7 @@ module Main where
 import qualified Data.Map                     as M
 import           Graphics.X11.ExtraTypes.XF86
 import           System.IO
-import           XMonad
+import           XMonad hiding (Position)
 import           XMonad.Hooks.DynamicLog
 import           XMonad.Hooks.ManageDocks
 import           XMonad.Layout.NoBorders
@@ -12,10 +12,15 @@ import           XMonad.Util.Run              (spawnPipe)
 
 main :: IO ()
 main = do
-  xmproc <- spawnPipe "xmobar"
+  writeFile "/home/knupfer/.xmobarrc" . unwords
+                                      . ("Config":)
+                                      . tail
+                                      . words
+                                      $ show xmobarConfig
+  xmproc <- spawnPipe "/home/knupfer/.xmonad/cpu-bar | xmobar"
   mapM_ (spawn . unwords)
     [
-      [ "sleep"     , "2;"
+      [ "sleep"     , "0.5;"
       , "setxkbmap" , "de;"
       , "xmodmap"   , "/home/knupfer/git/dotfiles/keyboard/linux/normalkeyboard/xmodmapneo"
       ]
@@ -97,3 +102,107 @@ myMouseBindings (XConfig {modMask = m}) = M.fromList
   , ((m, button2) , \w -> focus w >> windows W.shiftMaster) -- raise
   , ((m, button3) , \w -> focus w >> mouseResizeWindow w    -- resize
   >> windows W.shiftMaster)]
+
+xmobarConfig :: XMobarConfig
+xmobarConfig = XMobarConfig
+  { font     = "xft:DejaVu Sans Mono:size=10:bold"
+  , bgColor  = "black"
+  , fgColor  = "grey"
+  , persistent   = False
+  , position = Top
+  , border       = NoBorder
+  , borderColor  = "#BFBFBF"
+  , lowerOnStart = True
+  , hideOnStart  = False
+  , commands =
+    map Run [ Date "%a %_d %b %H:%M" "date" 600
+            , Battery
+              [ "--template" , "<acstatus>"
+              , "--Low"      , "20"
+              , "--High"     , "20"
+              , "--low"      , "#ff5050"
+              , "--normal"   , "#ddaa50"
+              , "--high"     , "#50aaff"
+              , "--"
+              , "-o"         , "<left>% <fc=#777777>(<timeleft>)</fc>" -- discharging
+              , "-i"         , "<left>%" -- charged
+              ] 40
+            , StdinReader
+            ]
+  , sepChar  = "%"
+  , alignSep = "}{"
+  , template = " %StdinReader% |}{| %battery% | <fc=#ee9a00>%date%</fc> "
+  }
+
+data XMobarConfig = XMobarConfig { font         :: String
+                                 , bgColor      :: String
+                                 , fgColor      :: String
+                                 , position     :: Position
+                                 , lowerOnStart :: Bool
+                                 , hideOnStart  :: Bool
+                                 , persistent   :: Bool
+                                 , border       :: Border
+                                 , borderColor  :: String
+                                 , commands     :: [Run Command]
+                                 , sepChar      :: String
+                                 , alignSep     :: String
+                                 , template     :: String
+                                 } deriving Show
+
+data Position = Top    | TopW    Align Int | TopSize    Align Int Int
+              | Bottom | BottomW Align Int | BottomSize Align Int Int
+              | Static { xpos  :: Int, ypos   :: Int
+                       , width :: Int, height :: Int
+                       } deriving Show
+
+data Align = L | C | R deriving Show
+
+data Border = TopB    | TopBM    Int
+            | BottomB | BottomBM Int
+            | FullB   | FullBM   Int
+            | NoBorder deriving Show
+
+data Command = Uptime                                [String] Int
+             | Weather            String             [String] Int
+             | Network            String             [String] Int
+             | DynNetwork                            [String] Int
+             | Wireless           String             [String] Int
+             | Memory                                [String] Int
+             | Swap                                  [String] Int
+             | Cpu                                   [String] Int
+             | MultiCpu                              [String] Int
+             | Battery                               [String] Int
+             | BatteryP           [String]           [String] Int
+             | TopProc                               [String] Int
+             | TopMem                                [String] Int
+             | DiskU              [(String, String)] [String] Int
+             | DiskIO             [(String, String)] [String] Int
+             | ThermalZone        Int                [String] Int
+             | Thermal            String             [String] Int
+             | CpuFreq                               [String] Int
+             | CoreTemp                              [String] Int
+             | Volume             String String      [String] Int
+             | MPD                                   [String] Int
+             | Mpris1             String             [String] Int
+             | Mpris2             String             [String] Int
+             | Mail               [(String, String)] String
+             | Mbox               [(String, String, String)] [String] String
+             | XPropertyLog       String
+             | NamedXPropertyLog  String String
+             | Brightness         [String]                    Int
+             | Kbd                [(String, String)]
+             | Locks
+             | Com                String [String] String      Int
+             | StdinReader
+             | Date               String String               Int
+             | DateZone           String String String String Int
+             | CommandReader      String String
+             | PipeReader         String String
+             | BufferedPipeReader String [(Int, Bool, String)]
+             | XMonadLog
+             deriving Show
+
+data Run a = Run Command
+
+instance Show a => Show (Run a) where
+  show (Run x) = unwords ["Run", show x]
