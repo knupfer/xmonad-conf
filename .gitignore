@@ -2,3 +2,6 @@
 /xmonad.errors
 /xmonad.hi
 /xmonad.o
+/cpu-bar
+/cpu-bar.hi
+/cpu-bar.o
