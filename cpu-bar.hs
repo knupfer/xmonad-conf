@@ -1,53 +1,33 @@
 module Main where
 
-import System.IO
-import Data.Char
-import Control.Concurrent
-import Control.Monad
+import           Control.Concurrent
+import           Control.Monad
+import           Data.Char
+import           Data.List
+import           System.IO
 
 main :: IO ()
 main = do
   stats <- newChan
-  forkIO . forever $ do
-    mem <- readFile "/proc/meminfo"
-    cpu <- readFile "/proc/stat"
-    net <- readFile "/proc/net/dev"
-    writeChan stats (mem, cpu, net)
-    threadDelay (5*10^5)
-  (mem, cpu, net) <- (\(a, b, c) -> (getMem a, getCpu b, getNet c))
-                     . unzip3
-                     <$> getChanContents stats
-  stat     <- newMVar ""
-  desktop <- newMVar ""
-  input <- lines <$> getContents
-  forkIO $
-     mapM_ ((\x -> do
-         d <- readMVar desktop
-         putStr $ d ++ " | "
-         putStrLn x
-         hFlush stdout
-         swapMVar stat x)
-       . barListToString)
-     $ scanl addToList barList (zip3 cpu mem net)
-  mapM_ (\x -> do
-      c <- readMVar stat
-      swapMVar desktop x
-      putStrLn $! x ++ " | " ++ c
-      hFlush stdout)
-    input
+  forkIO . forever $ (\[a,b,c] -> (a,b,c)) <$> getStats >>= writeChan stats
+                     >> threadDelay (10^(6::Int))
+  mapM_ ((>> hFlush stdout) . putStrLn) . getBarString =<< getChanContents stats
+  where getStats = mapM readFile ["/proc/meminfo", "/proc/stat", "/proc/net/dev"]
 
-numToBar :: (Double,Double,Double) -> String
-numToBar (cpu,mem,net) = concat [ "<fc=#"
-                                , concatMap (numToHex . num)
-                                  [ cpu
-                                  , net
-                                  , mem
-                                  ]
-                                 ,">=</fc>"]
-  where num n = max 0 . round $ n*255
-        numToHex n' = intToDigit (n' `div` 16) : [intToDigit (n' `mod` 16)]
+getBarString :: [(String, String, String)] -> [String]
+getBarString = map barListToString
+               . scanl addToList barList
+               . (\(a, b, c) -> zipWith3 BarElem (getMem a) (getCpu b) (getNet c))
+               . unzip3
 
-----
+numToBar :: Int -> BarElem Int -> String
+numToBar l (BarElem mem cpu net) = concat
+  [ "<fc=#", concatMap numToHex [cpu, net, mem], ">"
+  , replicate l '='
+  , "</fc>"
+  ]
+  where numToHex n' = intToDigit (n' `div` 16) : [intToDigit (n' `mod` 16)]
+
 getMem :: [String] -> [Double]
 getMem = map ( (\x -> 1 - minimum x/maximum x)
              . map (read . head . drop 1)
@@ -75,21 +55,42 @@ getNet ss = (\xs -> zipWith (/) (0:xs) (scanl max 1 xs))
                   $ words
                   <$> lines s
 
-barList :: [(Int, [(Double, Double, Double)])]
-barList = zip (map (round . (** (1 / 4)) . exp) [1..20]) (repeat [])
+barList :: BarList
+barList = [(x, pure 0) | x <- map (round . (** (1/2.5)) . exp) [0.5,1..25]]
 
-type BarList = [(Int,[(Double, Double, Double)])]
+type BarList = [(Int, BarElem Double)]
+data BarElem a = BarElem a a a deriving (Show, Eq)
 
-addToList :: BarList -> (Double, Double, Double) -> BarList
-addToList ((n, xs) :xss) new | length xs >= n = (n, new : init xs)
-                                                : addToList xss (last xs)
-                             | otherwise = (n, new : xs) : xss
+instance Functor BarElem where
+  fmap f (BarElem a b c) = BarElem (f a) (f b) (f c)
+
+instance Applicative BarElem where
+  pure a = BarElem a a a
+  BarElem f g h <*> BarElem a b c =  BarElem (f a) (g b) (h c)
+
+addToList :: BarList -> BarElem Double -> BarList
 addToList [] _ = []
+addToList ((n, x):xs) y = (n, (/n') .: (+) . ((n'-1)*) <$> x <*> y):addToList xs x
+  where n' = fromIntegral n
 
 barListToString :: BarList -> String
-barListToString = concatMap ( numToBar
-                            . (\(n, (a, b, c)) -> (a / n, b / n, c / n))
-                            . foldr (\(a, b, c) (n, (a', b', c'))
-                                       -> (n + 1, (a + a', b + b', c + c')))
-                                    (0, (0, 0, 0))
-                            . snd)
+barListToString xs = concatMap (\l@(x:_) -> numToBar (length l) x)
+                     . group
+                     . map (colNum <$>)
+                     . everySecond
+                     $ zipWith mean xs (tail xs)
+  where colNum = (`div`numberOfColors) . round . (*255) . max 0 . (fromIntegral numberOfColors*)
+        everySecond (y:_:ys) = y : everySecond ys
+        everySecond _ = []
+        mean (_, a) (_, b) = (/2) .: (+) <$> a <*> b
+
+numberOfColors :: Int
+numberOfColors = 32
+
+fromBarElem :: Num a => BarElem a -> (a,a,a)
+fromBarElem (BarElem a b c) = (a, b, c)
+
+infixr 9 .:
+
+(.:) :: (a -> b) -> (c -> d -> a) -> c -> d -> b
+f .: g = (f .) . g
