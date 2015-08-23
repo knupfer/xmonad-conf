@@ -1,14 +1,13 @@
 module Main where
 
+import           Data.Bool
 import qualified Data.Map                     as M
 import           Graphics.X11.ExtraTypes.XF86
-import           System.IO
-import           XMonad hiding (Position)
+import           XMonad                       hiding (Position)
 import           XMonad.Hooks.DynamicLog
 import           XMonad.Hooks.ManageDocks
 import           XMonad.Layout.NoBorders
 import qualified XMonad.StackSet              as W
-import           XMonad.Util.Run              (spawnPipe)
 
 main :: IO ()
 main = do
@@ -17,15 +16,16 @@ main = do
                                       . tail
                                       . words
                                       $ show xmobarConfig
-  xmproc <- spawnPipe "/home/knupfer/.xmonad/cpu-bar | xmobar"
   mapM_ (spawn . unwords)
     [
-      [ "sleep"     , "0.5;"
+      [ "pkill" , "trayer" ]
+    , [ "pkill" , "xmobar" ]
+    , [ "sleep"     , "0.2;"
       , "setxkbmap" , "de;"
       , "xmodmap"   , "/home/knupfer/git/dotfiles/keyboard/linux/normalkeyboard/xmodmapneo"
       ]
+    , [ "/home/knupfer/.xmonad/cpu-bar | xmobar" ]
     , [ "emacs" , "--daemon" ]
-    , [ "pkill" , "trayer"   ]
     , [ "trayer"
       , "--edge"            , "top"
       , "--align"           , "center"
@@ -49,21 +49,18 @@ main = do
     , focusedBorderColor = "#008888"
     , borderWidth        = 2
     , manageHook         = manageDocks <+> manageHook defaultConfig
-    , layoutHook         = smartBorders $ avoidStruts $ layoutHook defaultConfig
-    , logHook            = dynamicLogWithPP $ xmobarPP
-      { ppOutput = hPutStrLn xmproc
-      , ppTitle  = const ""
-      , ppLayout = \x -> if x == "Full" then " : " ++ x else ""
-      , ppSep    = ""
-      }
+    , layoutHook         = smartBorders . avoidStruts $ layoutHook defaultConfig
+    , logHook = dynamicLogString xmobarPP
+                {ppLayout = bool "" "F" . ("Full"==)}
+                >>= xmonadPropLog
     }
 
-myWorkspaces :: [String] -- number and name of workspaces
-myWorkspaces = fmap show ([1..4] :: [Int])
+myWorkspaces :: [String]
+myWorkspaces = map show ([1..4] :: [Int])
 
-myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ()) -- key bindings
+myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ())
 myKeys conf@(XConfig {modMask = m}) = M.fromList $
-  [ ((m .|. shiftMask, xK_c)       , kill)               -- kill win
+  [ ((m .|. shiftMask, xK_c)       , kill)
   , ((m .|. shiftMask, xK_e)       , windows W.swapDown) -- swap next
   , ((m .|. shiftMask, xK_k)       , windows W.swapUp)   -- swap prev
   , ((m .|. shiftMask, xK_i)       , sendMessage Shrink) -- shrink
@@ -119,7 +116,7 @@ xmobarConfig = XMobarConfig
             , Battery
               [ "--template" , "<acstatus>"
               , "--Low"      , "20"
-              , "--High"     , "20"
+              , "--High"     , "80"
               , "--low"      , "#ff5050"
               , "--normal"   , "#ddaa50"
               , "--high"     , "#50aaff"
@@ -128,10 +125,11 @@ xmobarConfig = XMobarConfig
               , "-i"         , "<left>%" -- charged
               ] 40
             , StdinReader
+            , XMonadLog
             ]
   , sepChar  = "%"
   , alignSep = "}{"
-  , template = " %StdinReader% |}{| %battery% | <fc=#ee9a00>%date%</fc> "
+  , template = " %StdinReader% | %XMonadLog% }{| %battery% | <fc=#ee9a00>%date%</fc> "
   }
 
 data XMobarConfig = XMobarConfig { font         :: String
