@@ -4,6 +4,9 @@ import           Data.Bool
 import qualified Data.Map                     as M
 import           Graphics.X11.ExtraTypes.XF86
 import           XMonad                       hiding (Position)
+import qualified XMonad.Prompt                as P
+import qualified XMonad.Prompt.Shell          as P
+import qualified XMonad.Prompt.Pass           as P
 import           XMonad.Hooks.DynamicLog
 import           XMonad.Hooks.ManageDocks
 import           XMonad.Layout.NoBorders
@@ -24,7 +27,7 @@ main = do
       , "setxkbmap" , "de;"
       , "xmodmap"   , "/home/knupfer/git/dotfiles/keyboard/linux/normalkeyboard/xmodmapneo"
       ]
-    , [ "/home/knupfer/.xmonad/cpu-bar | xmobar" ]
+    , [ "xmobar" ]
     , [ "emacs" , "--daemon" ]
     , [ "trayer"
       , "--edge"            , "top"
@@ -73,7 +76,12 @@ myKeys conf@(XConfig {modMask = m}) = M.fromList $
   , ((m, xK_h)      , spawn $ XMonad.terminal conf) -- term
   , ((m, xK_q)      , spawn "xmonad --recompile; xmonad --restart")
   , ((m, xK_e)      , spawn "emacsclient -c")
-  , ((m, xK_p)      , spawn "dmenu_run")              -- dmenu
+  , ((m .|. shiftMask, xK_p) , P.passPrompt def)
+  , ((m, xK_p)      , P.shellPrompt (def{ P.bgColor="#000"
+                                        , P.fgColor="grey"
+                                        , P.position=P.Top
+                                        , P.promptBorderWidth=0
+                                        , P.font="xft:DejaVu Sans Mono:size=10:bold"}))
   , ((m, xK_space)  , sendMessage NextLayout)         -- rot algo
   , ((m, xK_i)      , windows W.focusUp)              -- focus prev
   , ((m, xK_a)      , windows W.focusDown)            -- focus next
@@ -124,12 +132,20 @@ xmobarConfig = XMobarConfig
               , "-o"         , "<left>% <fc=#777777>(<timeleft>)</fc>" -- discharging
               , "-i"         , "<left>%" -- charged
               ] 40
-            , StdinReader
+            , Cpu ["-L","0","-H","50","--normal","green","--high","red"] 10
+            , DiskIO [("/", "<total>")] [] 10
+            , Memory [ "--template", "Mem: <usedratio>%"
+                     , "--Low"     , "20"
+                     , "--High"    , "60"
+                     , "--low"     , "darkgreen"
+                     , "--normal"  , "darkorange"
+                     , "--high"    , "darkred"
+                     ] 10
             , XMonadLog
             ]
   , sepChar  = "%"
   , alignSep = "}{"
-  , template = " %StdinReader% | %XMonadLog% }{| %battery% | <fc=#ee9a00>%date%</fc> "
+  , template = " %cpu% | %memory% | %diskio% | %XMonadLog% }{| %battery% | <fc=#ee9a00>%date%</fc> "
   }
 
 data XMobarConfig = XMobarConfig { font         :: String
