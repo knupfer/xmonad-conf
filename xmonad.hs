@@ -29,6 +29,7 @@ main = do
       ]
     , [ "xmobar" ]
     , [ "emacs" , "--daemon" ]
+    , [ "xsetroot", "-cursor_name", "left_ptr" ]
     , [ "trayer"
       , "--edge"            , "top"
       , "--align"           , "center"
@@ -41,7 +42,7 @@ main = do
       , "--tint"            , "0x000000"
       ]
     ]
-  xmonad defaultConfig
+  xmonad $ docks defaultConfig
     { modMask            = mod4Mask
     , terminal           = "xterm -rv -b 0 -w 0"
     , keys               = myKeys
@@ -62,7 +63,7 @@ myWorkspaces :: [String]
 myWorkspaces = map show ([1..4] :: [Int])
 
 myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ())
-myKeys conf@(XConfig {modMask = m}) = M.fromList $
+myKeys conf@XConfig {modMask = m} = M.fromList $
   [ ((m .|. shiftMask, xK_c)       , kill)
   , ((m .|. shiftMask, xK_e)       , windows W.swapDown) -- swap next
   , ((m .|. shiftMask, xK_k)       , windows W.swapUp)   -- swap prev
@@ -91,17 +92,18 @@ myKeys conf@(XConfig {modMask = m}) = M.fromList $
   , ((m, xK_comma)  , sendMessage (IncMasterN 1))     -- more wins
   , ((m, xK_period) , sendMessage (IncMasterN (-1)))  -- less wins
   , ((m, xK_f)      , sendMessage ToggleStruts)
+
   ] ++ -- switch and move to workspace
   [ ((n .|. m, k), windows $ f i)
   | (i, k) <- zip (XMonad.workspaces conf) [xK_t, xK_r, xK_n, xK_s]
   , (f, n) <- [(W.greedyView, 0), (W.shift, shiftMask)]
   ] ++ -- switch and move to screen
   [ ((n .|. m, key), screenWorkspace sc >>= flip whenJust (windows . f))
-    | (key, sc) <- zip [xK_F1, xK_F2, xK_F3] [0..]
+    | (key, sc) <- zip [xK_m, xK_w, xK_F3] [0..]
     , (f, n)    <- [(W.view, 0), (W.shift, shiftMask)]]
 
 myMouseBindings :: XConfig t -> M.Map (KeyMask, Button) (Window -> X ())
-myMouseBindings (XConfig {modMask = m}) = M.fromList
+myMouseBindings XConfig {modMask = m} = M.fromList
   [((m, button1) , \w -> focus w >> mouseMoveWindow w
   >> windows W.shiftMaster) -- dragging
   , ((m, button2) , \w -> focus w >> windows W.shiftMaster) -- raise
@@ -132,14 +134,14 @@ xmobarConfig = XMobarConfig
               , "-o"         , "<left>% <fc=#777777>(<timeleft>)</fc>" -- discharging
               , "-i"         , "<left>%" -- charged
               ] 40
-            , Cpu ["-L","0","-H","50","--normal","green","--high","red"] 10
+            , Cpu ["-L","33","-H","66","--low","green","--normal","yellow","--high","red"] 10
             , DiskIO [("/", "<total>")] [] 10
             , Memory [ "--template", "Mem: <usedratio>%"
-                     , "--Low"     , "20"
-                     , "--High"    , "60"
-                     , "--low"     , "darkgreen"
-                     , "--normal"  , "darkorange"
-                     , "--high"    , "darkred"
+                     , "-L"       , "33"
+                     , "-H"       , "66"
+                     , "--low"    , "green"
+                     , "--normal" , "yellow"
+                     , "--high"   , "red"
                      ] 10
             , XMonadLog
             ]
