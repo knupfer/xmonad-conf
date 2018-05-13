@@ -1,5 +1,7 @@
+{-# LANGUAGE RecordWildCards #-}
 module Main where
 
+import           Control.Monad
 import           Data.Bool
 import qualified Data.Map                     as M
 import           Graphics.X11.ExtraTypes.XF86
@@ -14,67 +16,35 @@ import qualified XMonad.StackSet              as W
 
 main :: IO ()
 main = do
-  writeFile "/home/knupfer/.xmobarrc" . unwords
-                                      . ("Config":)
-                                      . tail
-                                      . words
-                                      $ show xmobarConfig
+  writeFile "/home/knupfer/.xmobarrc" $ show xmobarConfig
   mapM_ (spawn . unwords)
-    [
-      [ "pkill" , "trayer" ]
-    , [ "pkill" , "xmobar" ]
-    , [ "sleep"     , "0.2;"
-      , "setxkbmap" , "de;"
-      , "xmodmap"   , "/home/knupfer/git/dotfiles/keyboard/linux/normalkeyboard/xmodmapneo"
-      ]
-    , [ "xmobar" ]
-    , [ "emacs" , "--daemon" ]
+    [ [ "xmodmap", "/home/knupfer/git/dotfiles/keyboard/linux/normalkeyboard/xmodmapneo" ]
     , [ "xsetroot", "-cursor_name", "left_ptr" ]
-    , [ "trayer"
-      , "--edge"            , "top"
-      , "--align"           , "center"
-      , "--SetDockType"     , "true"
-      , "--SetPartialStrut" , "true"
-      , "--expand"          , "true"
-      , "--width"           , "10"
-      , "--height"          , "17"
-      , "--transparent"     , "true"
-      , "--tint"            , "0x000000"
-      ]
     ]
-  xmonad $ docks defaultConfig
+  xmonad =<< xmobar def
     { modMask            = mod4Mask
-    , terminal           = "xterm -rv -b 0 -w 0"
+    , terminal           = "st -f \"Hasklig:size=10\""
     , keys               = myKeys
     , focusFollowsMouse  = False
-    , mouseBindings      = myMouseBindings
-    , workspaces         = myWorkspaces
+    , workspaces         = map show [1..4 :: Int]
     , normalBorderColor  = "#002222"
     , focusedBorderColor = "#008888"
     , borderWidth        = 2
-    , manageHook         = manageDocks <+> manageHook defaultConfig
-    , layoutHook         = smartBorders . avoidStruts $ layoutHook defaultConfig
+    , manageHook         = manageDocks <+> manageHook def
+    , layoutHook         = smartBorders . avoidStruts $ layoutHook def
     , logHook = dynamicLogString xmobarPP
-                {ppLayout = bool "" "F" . ("Full"==)}
-                >>= xmonadPropLog
+                 {ppLayout = bool "" "F" . ("Full"==)}
+                 >>= xmonadPropLog
     }
 
-myWorkspaces :: [String]
-myWorkspaces = map show ([1..4] :: [Int])
-
 myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ())
-myKeys conf@XConfig {modMask = m} = M.fromList $
+myKeys XConfig{..} = let m = modMask in  M.fromList $
   [ ((m .|. shiftMask, xK_c)       , kill)
   , ((m .|. shiftMask, xK_e)       , windows W.swapDown) -- swap next
   , ((m .|. shiftMask, xK_k)       , windows W.swapUp)   -- swap prev
   , ((m .|. shiftMask, xK_i)       , sendMessage Shrink) -- shrink
   , ((m .|. shiftMask, xK_a)       , sendMessage Expand) -- expand
-  , ((0, xF86XK_MonBrightnessUp)   , spawn "light -A 5")
-  , ((0, xF86XK_MonBrightnessDown) , spawn "light -U 5")
-  , ((0, xF86XK_AudioLowerVolume)  , spawn "amixer set Master 2%-")
-  , ((0, xF86XK_AudioRaiseVolume)  , spawn "amixer set Master 2%+")
-  , ((0, xF86XK_AudioMute)         , spawn "amixer set Master toggle")
-  , ((m, xK_h)      , spawn $ XMonad.terminal conf) -- term
+  , ((m, xK_h)      , spawn terminal)
   , ((m, xK_q)      , spawn "xmonad --recompile; xmonad --restart")
   , ((m, xK_e)      , spawn "emacsclient -c")
   , ((m .|. shiftMask, xK_p) , P.passPrompt def)
@@ -89,39 +59,29 @@ myKeys conf@XConfig {modMask = m} = M.fromList $
   , ((m, xK_m)      , windows W.focusMaster)          -- focus mastr
   , ((m, xK_Return) , windows W.swapMaster)           -- swap foc
   , ((m, xK_j)      , withFocused $ windows . W.sink) -- tiling
-  , ((m, xK_comma)  , sendMessage (IncMasterN 1))     -- more wins
-  , ((m, xK_period) , sendMessage (IncMasterN (-1)))  -- less wins
   , ((m, xK_f)      , sendMessage ToggleStruts)
 
   ] ++ -- switch and move to workspace
   [ ((n .|. m, k), windows $ f i)
-  | (i, k) <- zip (XMonad.workspaces conf) [xK_t, xK_r, xK_n, xK_s]
+  | (i, k) <- zip workspaces [xK_t, xK_r, xK_n, xK_s]
   , (f, n) <- [(W.greedyView, 0), (W.shift, shiftMask)]
-  ] ++ -- switch and move to screen
-  [ ((n .|. m, key), screenWorkspace sc >>= flip whenJust (windows . f))
-    | (key, sc) <- zip [xK_m, xK_w, xK_F3] [0..]
-    , (f, n)    <- [(W.view, 0), (W.shift, shiftMask)]]
-
-myMouseBindings :: XConfig t -> M.Map (KeyMask, Button) (Window -> X ())
-myMouseBindings XConfig {modMask = m} = M.fromList
-  [((m, button1) , \w -> focus w >> mouseMoveWindow w
-  >> windows W.shiftMaster) -- dragging
-  , ((m, button2) , \w -> focus w >> windows W.shiftMaster) -- raise
-  , ((m, button3) , \w -> focus w >> mouseResizeWindow w    -- resize
-  >> windows W.shiftMaster)]
+  ] ++ -- switch to screen
+  [ ((0 .|. m, k), screenWorkspace i >>= flip whenJust (windows . W.view))
+  | (i, k) <- zip [0..] [xK_m, xK_w]
+  ]
 
 xmobarConfig :: XMobarConfig
-xmobarConfig = XMobarConfig
-  { font     = "xft:DejaVu Sans Mono:size=10:bold"
-  , bgColor  = "black"
-  , fgColor  = "grey"
+xmobarConfig = Config
+  { font         = "xft:DejaVu Sans Mono:size=10:bold"
+  , bgColor      = "black"
+  , fgColor      = "grey"
   , persistent   = False
-  , position = Top
+  , position     = Top
   , border       = NoBorder
   , borderColor  = "#BFBFBF"
   , lowerOnStart = True
   , hideOnStart  = False
-  , commands =
+  , commands     =
     map Run [ Date "%a %_d %b %H:%M" "date" 600
             , Battery
               [ "--template" , "<acstatus>"
@@ -131,39 +91,42 @@ xmobarConfig = XMobarConfig
               , "--normal"   , "#ddaa50"
               , "--high"     , "#50aaff"
               , "--"
-              , "-o"         , "<left>% <fc=#777777>(<timeleft>)</fc>" -- discharging
-              , "-i"         , "<left>%" -- charged
+              , "-o"         , "<fc=#777777>♫☀☼☽☾♪♩♬(<timeleft>)</fc> <left>%" -- discharging
+              , "-O"         , "<fc=#ffff00>↯</fc> <left>%" -- charging
+              , "-i"         , "<fc=#ffff00>↯</fc> <left>%" -- charged
               ] 40
-            , Cpu ["-L","33","-H","66","--low","green","--normal","yellow","--high","red"] 10
-            , DiskIO [("/", "<total>")] [] 10
+            , MultiCpu ["--template", "<vbar0><vbar1><vbar2><vbar3><vbar4><vbar5><vbar6><vbar7>" ] 5
+            , Volume "default" "Master" [] 5
             , Memory [ "--template", "Mem: <usedratio>%"
                      , "-L"       , "33"
                      , "-H"       , "66"
                      , "--low"    , "green"
                      , "--normal" , "yellow"
                      , "--high"   , "red"
-                     ] 10
+                     ] 5
             , XMonadLog
             ]
   , sepChar  = "%"
   , alignSep = "}{"
-  , template = " %cpu% | %memory% | %diskio% | %XMonadLog% }{| %battery% | <fc=#ee9a00>%date%</fc> "
+  , template = "%default:Master%| %memory% | %XMonadLog% }{%multicpu% | %battery% | <fc=#ee9a00>%date%</fc>"
   }
 
-data XMobarConfig = XMobarConfig { font         :: String
-                                 , bgColor      :: String
-                                 , fgColor      :: String
-                                 , position     :: Position
-                                 , lowerOnStart :: Bool
-                                 , hideOnStart  :: Bool
-                                 , persistent   :: Bool
-                                 , border       :: Border
-                                 , borderColor  :: String
-                                 , commands     :: [Run Command]
-                                 , sepChar      :: String
-                                 , alignSep     :: String
-                                 , template     :: String
-                                 } deriving Show
+data XMobarConfig
+  = Config
+  { font         :: String
+  , bgColor      :: String
+  , fgColor      :: String
+  , position     :: Position
+  , lowerOnStart :: Bool
+  , hideOnStart  :: Bool
+  , persistent   :: Bool
+  , border       :: Border
+  , borderColor  :: String
+  , commands     :: [Run Command]
+  , sepChar      :: String
+  , alignSep     :: String
+  , template     :: String
+  } deriving Show
 
 data Position = Top    | TopW    Align Int | TopSize    Align Int Int
               | Bottom | BottomW Align Int | BottomSize Align Int Int
