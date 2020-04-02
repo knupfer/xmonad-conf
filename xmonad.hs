@@ -24,8 +24,8 @@ main = do
     , focusFollowsMouse  = False
     , workspaces         = map show [1..4 :: Int]
     , normalBorderColor  = "#002222"
-    , focusedBorderColor = "#008888"
-    , borderWidth        = 2
+    , focusedBorderColor = "#00BBBB"
+    , borderWidth        = 3
     , manageHook         = manageDocks <+> manageHook def
     , layoutHook         = smartBorders . avoidStruts $ layoutHook def
     , logHook = dynamicLogString xmobarPP
@@ -35,15 +35,22 @@ main = do
 
 myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ())
 myKeys XConfig{..} = let m = modMask in  M.fromList $
-  [ ((m .|. shiftMask, xK_c)       , kill)
-  , ((m .|. shiftMask, xK_e)       , windows W.swapDown) -- swap next
-  , ((m .|. shiftMask, xK_k)       , windows W.swapUp)   -- swap prev
-  , ((m .|. shiftMask, xK_i)       , sendMessage Shrink) -- shrink
-  , ((m .|. shiftMask, xK_a)       , sendMessage Expand) -- expand
+  [ ((0, xF86XK_AudioMute)         , spawn "amixer -q set Master toggle")
+  , ((0, xF86XK_AudioLowerVolume)  , spawn "amixer -q set Master 2%-")
+  , ((0, xF86XK_AudioRaiseVolume)  , spawn "amixer -q set Master 2%+")
+  , ((0, xF86XK_MonBrightnessDown) , spawn "light -U 1")
+  , ((0, xF86XK_MonBrightnessUp)   , spawn "light -A 1")
+
+  , ((m .|. shiftMask, xK_c) , kill)
+  , ((m .|. shiftMask, xK_e) , windows W.swapDown) -- swap next
+  , ((m .|. shiftMask, xK_k) , windows W.swapUp)   -- swap prev
+  , ((m .|. shiftMask, xK_i) , sendMessage Shrink) -- shrink
+  , ((m .|. shiftMask, xK_a) , sendMessage Expand) -- expand
+  , ((m .|. shiftMask, xK_p) , P.passPrompt def)
+
   , ((m, xK_h)      , spawn terminal)
   , ((m, xK_q)      , spawn "xmonad --recompile; xmonad --restart")
   , ((m, xK_e)      , spawn "emacsclient -c")
-  , ((m .|. shiftMask, xK_p) , P.passPrompt def)
   , ((m, xK_p)      , P.shellPrompt (def{ P.bgColor="#000"
                                         , P.fgColor="grey"
                                         , P.position=P.Top
@@ -78,7 +85,7 @@ xmobarConfig = Config
   , lowerOnStart = True
   , hideOnStart  = False
   , commands     =
-    map Run [ Date "%a %_d %b %H:%M" "date" 600
+    map Run [ Date "%Y-%m-%d KW%V %H:%M" "date" 100
             , Battery
               [ "--template" , "<acstatus>"
               , "--Low"      , "20"
@@ -87,19 +94,19 @@ xmobarConfig = Config
               , "--normal"   , "#ddaa50"
               , "--high"     , "#50aaff"
               , "--"
-              , "-o"         , "<fc=#777777>♫☀☼☽☾♪♩♬(<timeleft>)</fc> <left>%" -- discharging
+              , "-o"         , "<fc=#777777>(<timeleft>)</fc> <left>%" -- discharging
               , "-O"         , "<fc=#ffff00>↯</fc> <left>%" -- charging
               , "-i"         , "<fc=#ffff00>↯</fc> <left>%" -- charged
-              ] 40
-            , MultiCpu ["--template", "<vbar0><vbar1><vbar2><vbar3><vbar4><vbar5><vbar6><vbar7>" ] 5
-            , Volume "default" "Master" [] 5
+              ] 5
+            , MultiCpu ["--template", "<vbar0><vbar1><vbar2><vbar3><vbar4><vbar5><vbar6><vbar7>" ] 3
+            , Volume "default" "Master" [] 3
             , Memory [ "--template", "Mem: <usedratio>%"
                      , "-L"       , "33"
                      , "-H"       , "66"
                      , "--low"    , "green"
                      , "--normal" , "yellow"
                      , "--high"   , "red"
-                     ] 5
+                     ] 3
             , XMonadLog
             ]
   , sepChar  = "%"
