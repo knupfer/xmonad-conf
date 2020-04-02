@@ -17,10 +17,6 @@ import qualified XMonad.StackSet              as W
 main :: IO ()
 main = do
   writeFile "/home/knupfer/.xmobarrc" $ show xmobarConfig
-  mapM_ (spawn . unwords)
-    [ [ "xmodmap", "/home/knupfer/git/dotfiles/keyboard/linux/normalkeyboard/xmodmapneo" ]
-    , [ "xsetroot", "-cursor_name", "left_ptr" ]
-    ]
   xmonad =<< xmobar def
     { modMask            = mod4Mask
     , terminal           = "st -f \"Hasklig:size=10\""
@@ -122,7 +118,7 @@ data XMobarConfig
   , persistent   :: Bool
   , border       :: Border
   , borderColor  :: String
-  , commands     :: [Run Command]
+  , commands     :: [Run]
   , sepChar      :: String
   , alignSep     :: String
   , template     :: String
@@ -181,7 +177,7 @@ data Command = Uptime                                [String] Int
              | XMonadLog
              deriving Show
 
-data Run a = Run Command
+data Run = Run Command
 
-instance Show a => Show (Run a) where
+instance Show Run where
   show (Run x) = unwords ["Run", show x]
