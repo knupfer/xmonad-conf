@@ -75,7 +75,7 @@ myKeys XConfig{..} = let m = modMask in  M.fromList $
 
 xmobarConfig :: XMobarConfig
 xmobarConfig = Config
-  { font         = "xft:DejaVu Sans Mono:size=10:bold"
+  { font         = "xft:DejaVu Sans Mono:size=11:bold"
   , bgColor      = "black"
   , fgColor      = "grey"
   , persistent   = False
@@ -85,7 +85,7 @@ xmobarConfig = Config
   , lowerOnStart = True
   , hideOnStart  = False
   , commands     =
-    map Run [ Date "%Y-%m-%d KW%V %H:%M" "date" 100
+    map Run [ Date "%Y-%m-%d<fc=#00ffff>T</fc>%H:%M" "date" 100
             , Battery
               [ "--template" , "<acstatus>"
               , "--Low"      , "20"
@@ -111,7 +111,7 @@ xmobarConfig = Config
             ]
   , sepChar  = "%"
   , alignSep = "}{"
-  , template = "%default:Master%| %memory% | %XMonadLog% }{%multicpu% | %battery% | <fc=#ee9a00>%date%</fc>"
+  , template = "%default:Master%| %memory% | %XMonadLog% }{%multicpu% | %battery% | %date%"
   }
 
 data XMobarConfig
