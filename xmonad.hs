@@ -17,7 +17,7 @@ import qualified XMonad.StackSet              as W
 main :: IO ()
 main = do
   writeFile "/home/knupfer/.xmobarrc" $ show xmobarConfig
-  xmonad =<< xmobar def
+  launch =<< xmobar def
     { modMask            = mod4Mask
     , terminal           = "st -f \"Hasklig:size=10\""
     , keys               = myKeys
@@ -49,7 +49,6 @@ myKeys XConfig{..} = let m = modMask in  M.fromList $
   , ((m .|. shiftMask, xK_p) , P.passPrompt def)
 
   , ((m, xK_h)      , spawn terminal)
-  , ((m, xK_q)      , spawn "xmonad --recompile; xmonad --restart")
   , ((m, xK_e)      , spawn "emacsclient -c")
   , ((m, xK_p)      , P.shellPrompt (def{ P.bgColor="#000"
                                         , P.fgColor="grey"
