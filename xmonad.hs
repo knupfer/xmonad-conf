@@ -100,6 +100,7 @@ xmobarConfig = Config
               ] 5
             , MultiCpu ["--template", "<vbar0><vbar1><vbar2><vbar3><vbar4><vbar5><vbar6><vbar7>" ] 3
             , Volume "default" "Master" [] 3
+            , Weather "EDDS" ["-t", "<tempC>°C"] 36000
             , Memory [ "--template", "Mem: <usedratio>%"
                      , "-L"       , "33"
                      , "-H"       , "66"
@@ -111,7 +112,7 @@ xmobarConfig = Config
             ]
   , sepChar  = "%"
   , alignSep = "}{"
-  , template = "%default:Master%| %memory% | %XMonadLog% }{%multicpu% | %battery% | %date%"
+  , template = "%default:Master%| %memory% | %XMonadLog% }{%multicpu% | %battery% | %EDDS% %date%"
   }
 
 data XMobarConfig
