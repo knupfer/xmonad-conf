@@ -97,7 +97,7 @@ xmobarConfig = Config
               , "-O"         , "<fc=#ffff00>↯</fc> <left>%" -- charging
               , "-i"         , "<fc=#ffff00>↯</fc> <left>%" -- charged
               ] 5
-            , MultiCpu ["--template", "<vbar0><vbar1><vbar2><vbar3><vbar4><vbar5><vbar6><vbar7>" ] 3
+            , MultiCpu ["--template", "<vbar0><vbar1><vbar2><vbar3>" ] 3
             , Volume "default" "Master" [] 3
             , Weather "EDDS" ["-t", "<tempC>°C"] 36000
             , Memory [ "--template", "Mem: <usedratio>%"
