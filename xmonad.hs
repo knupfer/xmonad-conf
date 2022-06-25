@@ -25,7 +25,7 @@ main = do
     . withEasySB (statusBarProp "xmobar" (pure def {ppLayout = bool "" "F" . ("Full"==)})) toggleStrutsKey
     $ def
     { modMask            = mod4Mask
-    , terminal           = "st -f \"Hasklig:size=10\""
+    , terminal           = "st -f \"DejaVu Sans Mono:size=11:bold\""
     , keys               = myKeys
     , focusFollowsMouse  = False
     , workspaces         = map show [1..4 :: Int]
@@ -61,7 +61,7 @@ myKeys XConfig{..} = let m = modMask in M.fromList $
                                         , P.fgColor="grey"
                                         , P.position=P.Top
                                         , P.promptBorderWidth=0
-                                        , P.font="xft:DejaVu Sans Mono:size=10:bold"}))
+                                        , P.font="xft:DejaVu Sans Mono:size=11:bold"}))
   , ((m, xK_space)  , sendMessage NextLayout)         -- rot algo
   , ((m, xK_i)      , windows W.focusUp)              -- focus prev
   , ((m, xK_a)      , windows W.focusDown)            -- focus next
